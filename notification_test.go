@@ -1,10 +1,10 @@
 package apns2_test
 
 import (
+	"bytes"
 	"testing"
 
-	"github.com/sideshow/apns2"
-	"github.com/stretchr/testify/assert"
+	"github.com/sapienzaapps/apns2"
 )
 
 func TestMarshalJSON(t *testing.T) {
@@ -26,7 +26,11 @@ func TestMarshalJSON(t *testing.T) {
 		notification.Payload = scenario.in
 		payloadBytes, err := notification.MarshalJSON()
 
-		assert.Equal(t, scenario.out, payloadBytes)
-		assert.Equal(t, scenario.err, err)
+		if !bytes.Equal(scenario.out, payloadBytes) {
+			t.Fatal("Expected:", payloadBytes, " found:", scenario.out)
+		}
+		if scenario.err != err {
+			t.Fatal("Expected:", err, " found:", scenario.err)
+		}
 	}
 }

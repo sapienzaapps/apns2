@@ -8,15 +8,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/sideshow/apns2"
-	"github.com/sideshow/apns2/certificate"
-	"github.com/stretchr/testify/assert"
+	"github.com/sapienzaapps/apns2"
+	"github.com/sapienzaapps/apns2/certificate"
 )
 
 func TestNewClientManager(t *testing.T) {
 	manager := apns2.NewClientManager()
-	assert.Equal(t, manager.MaxSize, 64)
-	assert.Equal(t, manager.MaxAge, 10*time.Minute)
+	if manager.MaxSize != 64 {
+		t.Fatal("Expected:", 64, " found:", manager.MaxSize)
+	}
+	if manager.MaxAge != 10*time.Minute {
+		t.Fatal("Expected:", 10*time.Minute, " found:", manager.MaxAge)
+	}
 }
 
 func TestClientManagerGetWithoutNew(t *testing.T) {
@@ -30,9 +33,15 @@ func TestClientManagerGetWithoutNew(t *testing.T) {
 	c2 := manager.Get(mockCert())
 	v1 := reflect.ValueOf(c1)
 	v2 := reflect.ValueOf(c2)
-	assert.NotNil(t, c1)
-	assert.Equal(t, v1.Pointer(), v2.Pointer())
-	assert.Equal(t, 1, manager.Len())
+	if c1 == nil {
+		t.Fatal("c1 expected not nil, found nil")
+	}
+	if v1.Pointer() != v2.Pointer() {
+		t.Fatal("Expected:", v2.Pointer(), " found:", v1.Pointer())
+	}
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
 
 func TestClientManagerAddWithoutNew(t *testing.T) {
@@ -48,7 +57,9 @@ func TestClientManagerAddWithoutNew(t *testing.T) {
 		wg.Add(1)
 		go func() {
 			manager.Add(apns2.NewClient(mockCert()))
-			assert.Equal(t, 1, manager.Len())
+			if 1 != manager.Len() {
+				t.Fatal("Expected:", manager.Len(), " found:", 1)
+			}
 			wg.Done()
 		}()
 	}
@@ -62,7 +73,9 @@ func TestClientManagerLenWithoutNew(t *testing.T) {
 		Factory: apns2.NewClient,
 	}
 
-	assert.Equal(t, 0, manager.Len())
+	if 0 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 0)
+	}
 }
 
 func TestClientManagerGetDefaultOptions(t *testing.T) {
@@ -71,9 +84,15 @@ func TestClientManagerGetDefaultOptions(t *testing.T) {
 	c2 := manager.Get(mockCert())
 	v1 := reflect.ValueOf(c1)
 	v2 := reflect.ValueOf(c2)
-	assert.NotNil(t, c1)
-	assert.Equal(t, v1.Pointer(), v2.Pointer())
-	assert.Equal(t, 1, manager.Len())
+	if c1 == nil {
+		t.Fatal("c1 expected not nil, found nil")
+	}
+	if v1.Pointer() != v2.Pointer() {
+		t.Fatal("Expected:", v2.Pointer(), " found:", v1.Pointer())
+	}
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
 
 func TestClientManagerGetNilClientFactory(t *testing.T) {
@@ -83,9 +102,15 @@ func TestClientManagerGetNilClientFactory(t *testing.T) {
 	}
 	c1 := manager.Get(mockCert())
 	c2 := manager.Get(mockCert())
-	assert.Nil(t, c1)
-	assert.Nil(t, c2)
-	assert.Equal(t, 0, manager.Len())
+	if c1 != nil {
+		t.Fatal("c1 expected nil, found:", c1)
+	}
+	if c2 != nil {
+		t.Fatal("c2 expected nil, found:", c2)
+	}
+	if 0 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 0)
+	}
 }
 
 func TestClientManagerGetMaxAgeExpiration(t *testing.T) {
@@ -96,9 +121,15 @@ func TestClientManagerGetMaxAgeExpiration(t *testing.T) {
 	c2 := manager.Get(mockCert())
 	v1 := reflect.ValueOf(c1)
 	v2 := reflect.ValueOf(c2)
-	assert.NotNil(t, c1)
-	assert.NotEqual(t, v1.Pointer(), v2.Pointer())
-	assert.Equal(t, 1, manager.Len())
+	if c1 == nil {
+		t.Fatal("c1 expected not nil, found nil")
+	}
+	if v1.Pointer() == v2.Pointer() {
+		t.Fatal("v1.Pointer() != v2.Pointer()")
+	}
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
 
 func TestClientManagerGetMaxAgeExpirationWithNilFactory(t *testing.T) {
@@ -111,9 +142,15 @@ func TestClientManagerGetMaxAgeExpirationWithNilFactory(t *testing.T) {
 	c1 := manager.Get(mockCert())
 	time.Sleep(time.Microsecond)
 	c2 := manager.Get(mockCert())
-	assert.Nil(t, c1)
-	assert.Nil(t, c2)
-	assert.Equal(t, 1, manager.Len())
+	if c1 != nil {
+		t.Fatal("c1 expected nil, found:", c1)
+	}
+	if c2 != nil {
+		t.Fatal("c2 expected nil, found:", c2)
+	}
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
 
 func TestClientManagerGetMaxSizeExceeded(t *testing.T) {
@@ -125,8 +162,12 @@ func TestClientManagerGetMaxSizeExceeded(t *testing.T) {
 	_ = manager.Get(cert2)
 	cert3, _ := certificate.FromP12File("certificate/_fixtures/certificate-valid-encrypted.p12", "password")
 	c := manager.Get(cert3)
-	assert.True(t, bytes.Equal(cert3.Certificate[0], c.Certificate.Certificate[0]))
-	assert.Equal(t, 1, manager.Len())
+	if !bytes.Equal(cert3.Certificate[0], c.Certificate.Certificate[0]) {
+		t.Fatal("Certificate not valid after decrypting")
+	}
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
 
 func TestClientManagerAdd(t *testing.T) {
@@ -145,5 +186,7 @@ func TestClientManagerAddTwice(t *testing.T) {
 	manager := apns2.NewClientManager()
 	manager.Add(apns2.NewClient(mockCert()))
 	manager.Add(apns2.NewClient(mockCert()))
-	assert.Equal(t, 1, manager.Len())
+	if 1 != manager.Len() {
+		t.Fatal("Expected:", manager.Len(), " found:", 1)
+	}
 }
