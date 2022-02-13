@@ -58,7 +58,8 @@ func TestClientManagerAddWithoutNew(t *testing.T) {
 		go func() {
 			manager.Add(apns2.NewClient(mockCert()))
 			if 1 != manager.Len() {
-				t.Fatal("Expected:", manager.Len(), " found:", 1)
+				t.Error("Expected:", manager.Len(), " found:", 1)
+				t.Fail()
 			}
 			wg.Done()
 		}()

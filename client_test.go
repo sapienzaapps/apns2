@@ -139,16 +139,16 @@ func TestClientBadDeviceToken(t *testing.T) {
 func TestClientNameToCertificate(t *testing.T) {
 	crt, _ := certificate.FromP12File("certificate/_fixtures/certificate-valid.p12", "")
 	client := apns.NewClient(crt)
-	name := client.HTTPClient.Transport.(*http2.Transport).TLSClientConfig.NameToCertificate
-	if len(name) != 1 {
-		t.Fatal("Expected length 1")
+	name := client.HTTPClient.Transport.(*http2.Transport).TLSClientConfig.Certificates
+	if len(name) != 1 || len(name[0].Certificate) != 1 {
+		t.Fatal("Expected 1 certificate")
 	}
 
 	certificate2 := tls.Certificate{}
 	client2 := apns.NewClient(certificate2)
-	name2 := client2.HTTPClient.Transport.(*http2.Transport).TLSClientConfig.NameToCertificate
-	if len(name2) != 0 {
-		t.Fatal("Expected length 0")
+	name2 := client2.HTTPClient.Transport.(*http2.Transport).TLSClientConfig.Certificates
+	if len(name2) != 1 || len(name2[0].Certificate) != 0 {
+		t.Fatal("Expected zero certificates")
 	}
 }
 
@@ -468,7 +468,7 @@ func Test400BadRequestPayloadEmptyResponse(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("apns-id", apnsID)
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("{\"reason\":\"PayloadEmpty\"}"))
+		_, _ = w.Write([]byte("{\"reason\":\"PayloadEmpty\"}"))
 	}))
 	defer server.Close()
 	res, err := mockClient(server.URL).Push(n)
@@ -496,7 +496,7 @@ func Test410UnregisteredResponse(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("apns-id", apnsID)
 		w.WriteHeader(http.StatusGone)
-		w.Write([]byte("{\"reason\":\"Unregistered\", \"timestamp\": 1458114061260 }"))
+		_, _ = w.Write([]byte("{\"reason\":\"Unregistered\", \"timestamp\": 1458114061260 }"))
 	}))
 	defer server.Close()
 	res, err := mockClient(server.URL).Push(n)
@@ -524,7 +524,7 @@ func TestMalformedJSONResponse(t *testing.T) {
 	n := mockNotification()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.Write([]byte("{{MalformedJSON}}"))
+		_, _ = w.Write([]byte("{{MalformedJSON}}"))
 	}))
 	defer server.Close()
 	res, err := mockClient(server.URL).Push(n)

@@ -16,11 +16,10 @@ import (
 
 // Possible errors when parsing a certificate.
 var (
-	ErrFailedToDecryptKey       = errors.New("failed to decrypt private key")
-	ErrFailedToParsePrivateKey  = errors.New("failed to parse private key")
-	ErrFailedToParseCertificate = errors.New("failed to parse certificate PEM data")
-	ErrNoPrivateKey             = errors.New("no private key")
-	ErrNoCertificate            = errors.New("no certificate")
+	ErrFailedToDecryptKey      = errors.New("failed to decrypt private key")
+	ErrFailedToParsePrivateKey = errors.New("failed to parse private key")
+	ErrNoPrivateKey            = errors.New("no private key")
+	ErrNoCertificate           = errors.New("no certificate")
 )
 
 // FromP12File loads a PKCS#12 certificate from a local file and returns a
@@ -61,6 +60,12 @@ func FromP12Bytes(bytes []byte, password string) (tls.Certificate, error) {
 //
 // Use "" as the password argument if the PEM certificate is not password
 // protected.
+//
+// Deprecated: Legacy PEM encryption as specified in RFC 1423 is insecure by
+// design. Since it does not authenticate the ciphertext, it is vulnerable to
+// padding oracle attacks that can let an attacker recover the plaintext.
+// Use FromP12File.
+// (deprecation text from DecryptPEMBlock)
 func FromPemFile(filename string, password string) (tls.Certificate, error) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -77,6 +82,12 @@ func FromPemFile(filename string, password string) (tls.Certificate, error) {
 //
 // Use "" as the password argument if the PEM certificate is not password
 // protected.
+//
+// Deprecated: Legacy PEM encryption as specified in RFC 1423 is insecure by
+// design. Since it does not authenticate the ciphertext, it is vulnerable to
+// padding oracle attacks that can let an attacker recover the plaintext.
+// Use FromP12Bytes.
+// (deprecation text from DecryptPEMBlock)
 func FromPemBytes(bytes []byte, password string) (tls.Certificate, error) {
 	var cert tls.Certificate
 	var block *pem.Block
@@ -109,8 +120,8 @@ func FromPemBytes(bytes []byte, password string) (tls.Certificate, error) {
 }
 
 func unencryptPrivateKey(block *pem.Block, password string) (crypto.PrivateKey, error) {
-	if x509.IsEncryptedPEMBlock(block) {
-		bytes, err := x509.DecryptPEMBlock(block, []byte(password))
+	if x509.IsEncryptedPEMBlock(block) { //nolint // deprecated functions in interface, still supported for now
+		bytes, err := x509.DecryptPEMBlock(block, []byte(password)) //nolint // see comment above
 		if err != nil {
 			return nil, ErrFailedToDecryptKey
 		}

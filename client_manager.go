@@ -68,7 +68,7 @@ func (m *ClientManager) Add(client *Client) {
 	key := cacheKey(client.Certificate)
 	now := time.Now()
 	if ele, hit := m.cache[key]; hit {
-		item := ele.Value.(*managerItem)
+		item, _ := ele.Value.(*managerItem)
 		item.client = client
 		item.lastUsed = now
 		m.ll.MoveToFront(ele)
@@ -95,7 +95,7 @@ func (m *ClientManager) Get(certificate tls.Certificate) *Client {
 	key := cacheKey(certificate)
 	now := time.Now()
 	if ele, hit := m.cache[key]; hit {
-		item := ele.Value.(*managerItem)
+		item, _ := ele.Value.(*managerItem)
 		if m.MaxAge != 0 && item.lastUsed.Before(now.Add(-m.MaxAge)) {
 			c := m.Factory(certificate)
 			if c == nil {

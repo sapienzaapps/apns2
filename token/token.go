@@ -72,7 +72,11 @@ func (t *Token) GenerateIfExpired() (bearer string) {
 	t.Lock()
 	defer t.Unlock()
 	if t.Expired() {
-		t.Generate()
+		_, err := t.Generate()
+		if err != nil {
+			// It should never panic here, as Generate should fail with error only the first time
+			panic(err)
+		}
 	}
 	return t.Bearer
 }

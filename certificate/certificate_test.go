@@ -132,7 +132,7 @@ func TestBadPasswordPemFile(t *testing.T) {
 	if !certEqual(tls.Certificate{}, cer) {
 		t.Fatal("Expected:", cer, " found:", tls.Certificate{})
 	}
-	if certificate.ErrFailedToDecryptKey != err {
+	if !errors.Is(err, certificate.ErrFailedToDecryptKey) {
 		t.Fatal("Expected:", err, " found:", certificate.ErrFailedToDecryptKey)
 	}
 }
@@ -142,7 +142,7 @@ func TestBadKeyPemFile(t *testing.T) {
 	if !certEqual(tls.Certificate{}, cer) {
 		t.Fatal("Expected:", cer, " found:", tls.Certificate{})
 	}
-	if certificate.ErrFailedToParsePrivateKey != err {
+	if !errors.Is(err, certificate.ErrFailedToParsePrivateKey) {
 		t.Fatal("Expected:", err, " found:", certificate.ErrFailedToParsePrivateKey)
 	}
 }
@@ -152,7 +152,7 @@ func TestNoKeyPemFile(t *testing.T) {
 	if !certEqual(tls.Certificate{}, cer) {
 		t.Fatal("Expected:", cer, " found:", tls.Certificate{})
 	}
-	if certificate.ErrNoPrivateKey != err {
+	if !errors.Is(err, certificate.ErrNoPrivateKey) {
 		t.Fatal("Expected:", err, " found:", certificate.ErrNoPrivateKey)
 	}
 }
@@ -162,7 +162,7 @@ func TestNoCertificatePemFile(t *testing.T) {
 	if !certEqual(tls.Certificate{}, cer) {
 		t.Fatal("Expected:", cer, " found:", tls.Certificate{})
 	}
-	if certificate.ErrNoCertificate != err {
+	if !errors.Is(err, certificate.ErrNoCertificate) {
 		t.Fatal("Expected:", err, " found:", certificate.ErrNoCertificate)
 	}
 }

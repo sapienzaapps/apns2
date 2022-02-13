@@ -25,7 +25,7 @@ func TestResponseSent(t *testing.T) {
 func TestIntTimestampParse(t *testing.T) {
 	response := &apns.Response{}
 	payload := "{\"reason\":\"Unregistered\", \"timestamp\":1458114061260}"
-	json.Unmarshal([]byte(payload), &response)
+	_ = json.Unmarshal([]byte(payload), &response)
 	if int64(1458114061260)/1000 != response.Timestamp.Unix() {
 		t.Fatal("Expected:", response.Timestamp.Unix(), " found:", int64(1458114061260)/1000)
 	}

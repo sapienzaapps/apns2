@@ -2,6 +2,7 @@ package apns2_test
 
 import (
 	"bytes"
+	"errors"
 	"testing"
 
 	"github.com/sapienzaapps/apns2"
@@ -29,7 +30,7 @@ func TestMarshalJSON(t *testing.T) {
 		if !bytes.Equal(scenario.out, payloadBytes) {
 			t.Fatal("Expected:", payloadBytes, " found:", scenario.out)
 		}
-		if scenario.err != err {
+		if !errors.Is(scenario.err, err) {
 			t.Fatal("Expected:", err, " found:", scenario.err)
 		}
 	}
