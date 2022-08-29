@@ -186,7 +186,7 @@ func (c *Client) PushWithContext(ctx Context, n *Notification) (*Response, error
 	response.ApnsID = httpRes.Header.Get("apns-id")
 
 	decoder := json.NewDecoder(httpRes.Body)
-	if err := decoder.Decode(&response); err != nil && errors.Is(err, io.EOF) {
+	if err := decoder.Decode(&response); err != nil && !errors.Is(err, io.EOF) {
 		return &Response{}, err
 	}
 	return response, nil
